@@ -1,0 +1,26 @@
+
+{
+    "blogApp": {
+        "entry" : {
+            "home": {
+                "title": "Entries",
+                "createLabel": "Dodaj Entry",
+                "createOrEditLabel": "Dodaj lub edytuj: Entry"
+            },
+            "created": "Utworzono nowy Entry z identyfikatorem {{ param }}",
+            "updated": "Uaktualniono Entry z identyfikatorem {{ param }}",
+            "deleted": "Usunięto Entry z identyfikatorem {{ param }}",
+            "delete": {
+                "question": "Czy na pewno chcesz usunąć Entry {{ id }}?"
+            },
+            "detail": {
+                "title": "Entry"
+            },
+            "title": "Title",
+            "content": "Content",
+            "date": "Date",
+            "blog": "Blog",
+            "tag": "Tag"
+        }
+    }
+}
