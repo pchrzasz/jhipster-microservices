@@ -25,7 +25,7 @@ jobs:
         paths:
         - ~/.m2
         key: v1-dependencies-{{ checksum "pom.xml" }}
-    - run: mvn test
+    - run: mvn test -T 4
     - restore_cache:
         keys:
         - v1-dependencies-{{ checksum "package.json" }}
