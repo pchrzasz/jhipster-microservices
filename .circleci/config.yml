@@ -5,7 +5,7 @@ jobs:
     - image: circleci/openjdk:8-jdk-node-browsers
     working_directory: ~/jhipster-microservices/blog
     environment:
-      MAVEN_OPTS: -Xmx3200m
+      MAVEN_OPTS: -Xmx4096m
     steps:
     - checkout:
         path: ~/jhipster-microservices
