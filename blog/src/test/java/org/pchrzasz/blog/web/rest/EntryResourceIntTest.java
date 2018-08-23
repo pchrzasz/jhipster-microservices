@@ -1,43 +1,42 @@
 package org.pchrzasz.blog.web.rest;
 
-import org.pchrzasz.blog.BlogApp;
-
-import org.pchrzasz.blog.domain.Entry;
-import org.pchrzasz.blog.repository.EntryRepository;
-import org.pchrzasz.blog.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.pchrzasz.blog.BlogApp;
+import org.pchrzasz.blog.domain.Blog;
+import org.pchrzasz.blog.domain.Entry;
+import org.pchrzasz.blog.repository.BlogRepository;
+import org.pchrzasz.blog.repository.EntryRepository;
+import org.pchrzasz.blog.repository.UserRepository;
+import org.pchrzasz.blog.web.rest.errors.ExceptionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Base64Utils;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import static org.pchrzasz.blog.web.rest.TestUtil.sameInstant;
-import static org.pchrzasz.blog.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.*;
+import static org.pchrzasz.blog.web.rest.TestUtil.createFormattingConversionService;
+import static org.pchrzasz.blog.web.rest.TestUtil.sameInstant;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -76,6 +75,12 @@ public class EntryResourceIntTest {
     @Autowired
     private EntityManager em;
 
+    @Autowired
+    private BlogRepository blogRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private MockMvc restEntryMockMvc;
 
     private Entry entry;
@@ -93,11 +98,11 @@ public class EntryResourceIntTest {
 
     /**
      * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
+     * <p>
+     * This is a method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
-    public static Entry createEntity(EntityManager em) {
+    public Entry createEntity(EntityManager em) {
         Entry entry = new Entry()
             .title(DEFAULT_TITLE)
             .content(DEFAULT_CONTENT)
@@ -187,8 +192,17 @@ public class EntryResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser
     public void getAllEntries() throws Exception {
+        Blog blog = new Blog()
+            .name("asd")
+            .handle("zxc")
+            .user(userRepository.findOneByLogin("user").get());
+
+        entry.setBlog(blog);
+
         // Initialize the database
+        blogRepository.saveAndFlush(blog);
         entryRepository.saveAndFlush(entry);
 
         // Get all the entryList
@@ -200,7 +214,7 @@ public class EntryResourceIntTest {
             .andExpect(jsonPath("$.[*].content").value(hasItem(DEFAULT_CONTENT.toString())))
             .andExpect(jsonPath("$.[*].date").value(hasItem(sameInstant(DEFAULT_DATE))));
     }
-    
+
     public void getAllEntriesWithEagerRelationshipsIsEnabled() throws Exception {
         EntryResource entryResource = new EntryResource(entryRepositoryMock);
         when(entryRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
@@ -212,24 +226,24 @@ public class EntryResourceIntTest {
             .setMessageConverters(jacksonMessageConverter).build();
 
         restEntryMockMvc.perform(get("/api/entries?eagerload=true"))
-        .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
         verify(entryRepositoryMock, times(1)).findAllWithEagerRelationships(any());
     }
 
     public void getAllEntriesWithEagerRelationshipsIsNotEnabled() throws Exception {
         EntryResource entryResource = new EntryResource(entryRepositoryMock);
-            when(entryRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
-            MockMvc restEntryMockMvc = MockMvcBuilders.standaloneSetup(entryResource)
+        when(entryRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+        MockMvc restEntryMockMvc = MockMvcBuilders.standaloneSetup(entryResource)
             .setCustomArgumentResolvers(pageableArgumentResolver)
             .setControllerAdvice(exceptionTranslator)
             .setConversionService(createFormattingConversionService())
             .setMessageConverters(jacksonMessageConverter).build();
 
         restEntryMockMvc.perform(get("/api/entries?eagerload=true"))
-        .andExpect(status().isOk());
+            .andExpect(status().isOk());
 
-            verify(entryRepositoryMock, times(1)).findAllWithEagerRelationships(any());
+        verify(entryRepositoryMock, times(1)).findAllWithEagerRelationships(any());
     }
 
     @Test
@@ -247,6 +261,7 @@ public class EntryResourceIntTest {
             .andExpect(jsonPath("$.content").value(DEFAULT_CONTENT.toString()))
             .andExpect(jsonPath("$.date").value(sameInstant(DEFAULT_DATE)));
     }
+
     @Test
     @Transactional
     public void getNonExistingEntry() throws Exception {
