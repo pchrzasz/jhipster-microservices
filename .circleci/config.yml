@@ -20,7 +20,7 @@ jobs:
         paths:
         - ~/.m2
         key: v1-dependencies-{{ checksum "pom.xml" }}
-    - run: ./mvnw integration-test
+    - run: ./mvnw test
     - restore_cache:
         keys:
         - v1-dependencies-{{ checksum "package.json" }}
@@ -52,7 +52,7 @@ jobs:
         paths:
         - ~/.m2
         key: v1-dependencies-{{ checksum "pom.xml" }}
-    - run: ./mvnw integration-test
+    - run: ./mvnw test
     - restore_cache:
         keys:
         - v1-dependencies-{{ checksum "package.json" }}
