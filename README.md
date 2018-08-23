@@ -1,0 +1,1 @@
+[![CircleCI](https://circleci.com/gh/pchrzasz/jhipster-microservices.svg?style=svg)](https://circleci.com/gh/pchrzasz/jhipster-microservices)
