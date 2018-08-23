@@ -4,7 +4,7 @@ jobs:
   "blog":
     docker:
     - image: circleci/openjdk:8-jdk-node-browsers
-    working_directory: ~/jhipster-microservices/blog
+    working_directory: ~/repo/blog
     environment:
       MAVEN_OPTS: -Xmx3200m
     steps:
@@ -43,7 +43,7 @@ jobs:
   "store":
     docker:
     - image: circleci/openjdk:8-jdk-node-browsers
-    working_directory: ~/jhipster-microservices/store
+    working_directory: ~/repo/store
     environment:
       MAVEN_OPTS: -Xmx3200m
     steps:
