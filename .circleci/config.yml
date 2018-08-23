@@ -20,12 +20,12 @@ jobs:
         - v1-dependencies-{{ checksum "pom.xml" }}
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
-    - run: ./mvnw dependency:go-offline
+    - run: mvn dependency:go-offline
     - save_cache:
         paths:
         - ~/.m2
         key: v1-dependencies-{{ checksum "pom.xml" }}
-    - run: ./mvnw test
+    - run: mvn test
     - restore_cache:
         keys:
         - v1-dependencies-{{ checksum "package.json" }}
@@ -46,12 +46,12 @@ jobs:
         - v1-dependencies-{{ checksum "pom.xml" }}
         # fallback to using the latest cache if no exact match is found
         - v1-dependencies-
-    - run: ./mvnw dependency:go-offline
+    - run: mvn dependency:go-offline
     - save_cache:
         paths:
         - ~/.m2
         key: v1-dependencies-{{ checksum "pom.xml" }}
-    - run: ./mvnw test
+    - run: mvn test
     - restore_cache:
         keys:
         - v1-dependencies-{{ checksum "package.json" }}
