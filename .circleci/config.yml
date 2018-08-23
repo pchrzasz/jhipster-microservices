@@ -21,10 +21,10 @@ jobs:
         - ~/.m2
         key: v1-dependencies-{{ checksum "pom.xml" }}
     - run: yarn install
-      - save_cache:
-          paths:
-          - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+    - save_cache:
+        paths:
+        - node_modules
+        key: v1-dependencies-{{ checksum "package.json" }}
     - run: yarn test
     - run: ./mvnw test
     - restore_cache:
