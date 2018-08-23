@@ -1,20 +1,20 @@
 package org.pchrzasz.blog.web.rest;
 
-import org.pchrzasz.blog.BlogApp;
-
-import org.pchrzasz.blog.domain.Blog;
-import org.pchrzasz.blog.repository.BlogRepository;
-import org.pchrzasz.blog.web.rest.errors.ExceptionTranslator;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.pchrzasz.blog.BlogApp;
+import org.pchrzasz.blog.domain.Blog;
+import org.pchrzasz.blog.repository.BlogRepository;
+import org.pchrzasz.blog.repository.UserRepository;
+import org.pchrzasz.blog.web.rest.errors.ExceptionTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -23,10 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-
-import static org.pchrzasz.blog.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.pchrzasz.blog.web.rest.TestUtil.createFormattingConversionService;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -47,6 +46,9 @@ public class BlogResourceIntTest {
 
     @Autowired
     private BlogRepository blogRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Autowired
@@ -78,14 +80,15 @@ public class BlogResourceIntTest {
 
     /**
      * Create an entity for this test.
-     *
-     * This is a static method, as tests for other entities might also need it,
+     * <p>
+     * This is a method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
-    public static Blog createEntity(EntityManager em) {
+    public Blog createEntity(EntityManager em) {
         Blog blog = new Blog()
             .name(DEFAULT_NAME)
-            .handle(DEFAULT_HANDLE);
+            .handle(DEFAULT_HANDLE)
+            .user(userRepository.findOneByLogin("user").get());
         return blog;
     }
 
@@ -170,6 +173,7 @@ public class BlogResourceIntTest {
 
     @Test
     @Transactional
+    @WithMockUser
     public void getAllBlogs() throws Exception {
         // Initialize the database
         blogRepository.saveAndFlush(blog);
@@ -182,7 +186,7 @@ public class BlogResourceIntTest {
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
             .andExpect(jsonPath("$.[*].handle").value(hasItem(DEFAULT_HANDLE.toString())));
     }
-    
+
 
     @Test
     @Transactional
@@ -198,6 +202,7 @@ public class BlogResourceIntTest {
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
             .andExpect(jsonPath("$.handle").value(DEFAULT_HANDLE.toString()));
     }
+
     @Test
     @Transactional
     public void getNonExistingBlog() throws Exception {
